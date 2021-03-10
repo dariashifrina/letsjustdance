@@ -3,10 +3,9 @@
   <arg name="x_pos" default="0.0"/>
   <arg name="y_pos" default="0.0"/>
   <arg name="z_pos" default="0.0"/>
-  <arg name="world" default="empty"/>
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find intro_robo_utils)/worlds/$(arg world).world"/>
+    <arg name="world_name" value="$(find lets_just_dance)/worlds/citygrid.world"/>
     <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
     <arg name="gui" value="true"/>
