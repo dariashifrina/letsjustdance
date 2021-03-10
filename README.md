@@ -17,5 +17,5 @@ $ roscore
 ```
 
 ```
-$ roslaunch lets_just_dance turtlebot3_custom_world.launch world:=citygrid
+$ roslaunch lets_just_dance turtlebot3_custom_world.launch
 ```
