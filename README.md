@@ -1,8 +1,19 @@
-# letsjustdance
+# Let's Just Dance
+
+## Team Members: Leandra Nealer, Joyce Passananti, Daria Shifrina
+
+
+<p align="center">
+  <img src="mapgrid.png" alt="City Grid"/>
+</p>
+
 Final Project Repository for Introduction to Robotics. 
 
 
-To run:
+
+## Running Instructions 
+
+### Update your source first:
 
 ```
 $ cd ~/catkin_ws && catkin_make
@@ -10,7 +21,7 @@ $ source devel/setup.bash
 ```
 
 
-Terminals:
+### Terminals:
 
 ```
 $ roscore
