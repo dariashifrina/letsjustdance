@@ -5,6 +5,47 @@ from sensor_msgs.msg import Image
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Vector3
 
+
+example_nodes = [(0,0), (0,1), (1,0), (1,1)]
+
+class Graph:
+        def __init__(self, nodes):
+                # this makes an undirected graph, we could do a directed one too?
+                # take in a list of nodes stored as tuples
+                self.edges = {} # list of edges to be used in bfs
+             
+                for node in nodes:
+                        # for movement purposes, we want edges[node] = [left_node, right_node, up_node, down_node]
+                        # edges[node][i] = -1 if movement in that direction is impossible
+
+                        new = [-1]*4
+
+                        for point in nodes:
+                                if node[0] in point or node[1] in point:
+                                        if point[0] == node[0]-1 and point[1] == node[1]:
+                                                new[0] = point
+                                        if point[0] == node[0] + 1 and point[1] == node[1]:
+                                                new[1] = point
+                                        if point[1] == node[1]+1 and point[0] == node[0]:
+                                                new[2] = point
+                                        if point[1] == node[1]-1 and point[0] == node[0]:
+                                                new[3] = point
+                        self.edges[node] = new
+
+        def remove_edge(self, src, goal):
+                # method to remove edge that is no longer navigable(i.e traffic cone blocking, etc)
+                # remove src -> goal edge:
+                direction = self.edges[src].index(goal)
+                self.edges[src][direction] = -1
+
+                direction = self.edges[goal].index(src)
+                self.edges[goal][direction] = -1
+
+        #def get_path(self, src, goal):
+        
+
+
+
 class Follower:
 
         def __init__(self):
@@ -74,7 +115,6 @@ class Follower:
                 rospy.spin()
                 
 if __name__ == '__main__':
-
         rospy.init_node('line_follower')
-        follower = Follower()
-        follower.run()
+        #follower = Follower()
+        #follower.run()
