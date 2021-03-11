@@ -358,7 +358,7 @@
           <geometry>
             <mesh>
               <scale>0.001 0.001 0.001</scale>
-              <uri>/home/dshifrina/catkin_ws/src/turtlebot3/turtlebot3_description/meshes/bases/waffle_pi_base.stl</uri>
+              <uri>../../turtlebot3/turtlebot3_description/meshes/bases/waffle_pi_base.stl</uri>
             </mesh>
           </geometry>
           <material>
@@ -373,7 +373,7 @@
           <geometry>
             <mesh>
               <scale>0.001 0.001 0.001</scale>
-              <uri>/home/dshifrina/catkin_ws/src/turtlebot3/turtlebot3_description/meshes/sensors/lds.stl</uri>
+              <uri>../../turtlebot3/turtlebot3_description/meshes/sensors/lds.stl</uri>
             </mesh>
           </geometry>
           <material>
@@ -533,7 +533,7 @@
           <geometry>
             <mesh>
               <scale>0.001 0.001 0.001</scale>
-              <uri>/home/dshifrina/catkin_ws/src/turtlebot3/turtlebot3_description/meshes/wheels/left_tire.stl</uri>
+              <uri>../../turtlebot3/turtlebot3_description/meshes/wheels/left_tire.stl</uri>
             </mesh>
           </geometry>
           <material>
@@ -615,7 +615,7 @@
           <geometry>
             <mesh>
               <scale>0.001 0.001 0.001</scale>
-              <uri>/home/dshifrina/catkin_ws/src/turtlebot3/turtlebot3_description/meshes/wheels/right_tire.stl</uri>
+              <uri>../../turtlebot3/turtlebot3_description/meshes/wheels/right_tire.stl</uri>
             </mesh>
           </geometry>
           <material>
