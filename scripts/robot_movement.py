@@ -6,7 +6,7 @@ from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Vector3
 
 
-example_nodes = [(0,0), (0,1), (1,0), (1,1)]
+example_nodes = [(0,0), (0,3), (3,0), (3,3)]
 
 class Graph:
         def __init__(self, nodes):
@@ -22,13 +22,14 @@ class Graph:
 
                         for point in nodes:
                                 if node[0] in point or node[1] in point:
-                                        if point[0] == node[0]-1 and point[1] == node[1]:
+                                        n = 3 # size of grid square
+                                        if point[0] == node[0]-n and point[1] == node[1]:
                                                 new[0] = point
-                                        if point[0] == node[0] + 1 and point[1] == node[1]:
+                                        if point[0] == node[0] + n and point[1] == node[1]:
                                                 new[1] = point
-                                        if point[1] == node[1]+1 and point[0] == node[0]:
+                                        if point[1] == node[1]+n and point[0] == node[0]:
                                                 new[2] = point
-                                        if point[1] == node[1]-1 and point[0] == node[0]:
+                                        if point[1] == node[1]-n and point[0] == node[0]:
                                                 new[3] = point
                         self.edges[node] = new
 
@@ -41,10 +42,32 @@ class Graph:
                 direction = self.edges[goal].index(src)
                 self.edges[goal][direction] = -1
 
-        #def get_path(self, src, goal):
-        
+        def is_equal(self,node1,node2):
+                # check if two nodes are equal
+                return node1[0] == node2[0] and node1[1] == node2[1] 
 
+        def plan_path(self, src, goal):
+        # bfs search to find fastest path on unweighted, undirected graph
+                explored = [] # array of explored nodes
+                queue = [[src]] # array of paths
+                if self.is_equal(src, goal):
+                        return []
+                
+                while queue:
+                        path = queue.pop(0) # queue stores the paths of each branch
+                        node = path[-1] # last item of path
 
+                        if node not in explored:
+                                adjacent = [i for i in self.edges[node] if i != -1] # find neighbors
+                                for nbr in adjacent:
+                                        new_path = list(path)
+                                        new_path.append(nbr)
+                                        queue.append(new_path)
+
+                                        if nbr == goal:
+                                                return new_path
+                                explored.append(node)
+                return -1
 
 class Follower:
 
@@ -116,5 +139,5 @@ class Follower:
                 
 if __name__ == '__main__':
         rospy.init_node('line_follower')
-        #follower = Follower()
-        #follower.run()
+        follower = Follower()
+        follower.run()
