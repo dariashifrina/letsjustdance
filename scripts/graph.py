@@ -2,7 +2,7 @@ from itertools import permutations
 import math
 import numpy as np
 
-example_nodes = [(0,0),(3,0),(0,3),(3,3), (0,6)]
+example_nodes = [(0,0),(3,0),(0,3),(3,3),(6,0)]
 
 class Graph:
         def __init__(self, nodes):
@@ -72,10 +72,9 @@ class Graph:
             src = self.find_nearest_node_with_goal(src,goal)
             distances_goals = [math.dist(low, goal), math.dist(high,goal)]
             paths = [self.plan_path_in_edges(src,low), self.plan_path_in_edges(src,high)]
-            if paths[0] == -1:
-                return paths[1]
-            if paths[1] == -1:
-                return paths[0]
+
+            if paths[0] == -1 or paths[1] == -1:
+                return -1
 
             distances_paths = [self.n * len(paths[0]), self.n * len(paths[1])]
 
@@ -92,7 +91,7 @@ class Graph:
                 queue = [[src]] # array of paths
 
                 if self.is_equal(src, goal):
-                        return []
+                    return []
                 
                 while queue:
                         path = queue.pop(0) # queue stores the paths of each branch
@@ -113,16 +112,29 @@ class Graph:
         def plan_path(self, src, goal):
             # plan_path, but works with src and goal not in edges, i.e. betwen nodes
             whole_src = self.find_nearest_node_with_goal(src,goal)
-            whole_goal = self.find_nearest_goal(src,goal)
-            if math.dist(whole_src, goal) >= math.dist(src, goal):
+            whole_goal = self.find_nearest_goal(src, goal)
+            if whole_goal == -1 or whole_src == -1:
+                return -1
+
+            print(whole_goal)
+            print(goal)
+
+            if math.dist(whole_src, goal) > math.dist(src, goal) or math.dist(src, whole_goal) > math.dist(src, goal):
                 # check if the src and goal are between the same intersections
                 return []
-
             path = self.plan_path_in_edges(whole_src, whole_goal)
-            if not self.is_equal(whole_src, src):
-                path = [whole_src] + path
+            if path == -1:
+                return path
+            print(path)
+            # if not self.is_equal(whole_src, src):
+            #     path = [whole_src] + path
+            #     print(path)
+
             if not self.is_equal(whole_goal, goal):
-                path[-1] = whole_goal
+                if not path:
+                    path += [whole_goal]
+                else:
+                    path[-1] = whole_goal
                 path += [goal]
                
             return path
@@ -148,9 +160,6 @@ class Graph:
 
 
 
-        
-
-
 goals = [(0,3), (0,6)]
 g = Graph(example_nodes)
-print(g.plan_path((0,1.1), (0,2)))
+print(g.plan_path((.5,0), (0,.5)))
