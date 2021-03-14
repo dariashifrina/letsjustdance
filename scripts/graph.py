@@ -1,5 +1,5 @@
 
-example_nodes = [(0,0),(3,0),(0,3)(3,3)]
+example_nodes = [(0,0),(3,0),(0,3),(3,3)]
 
 class Graph:
         def __init__(self, nodes):
