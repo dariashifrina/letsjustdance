@@ -30,3 +30,7 @@ $ roscore
 ```
 $ roslaunch lets_just_dance turtlebot3_custom_world.launch
 ```
+
+### References:
+
+1. Multiple turtles: https://github.com/francimala/ROS_multiple_navigation
