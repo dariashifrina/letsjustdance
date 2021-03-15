@@ -2,7 +2,7 @@ from itertools import permutations
 import math
 import numpy as np
 
-example_nodes = [(0,0),(3,0),(0,3),(3,3),(6,0)]
+example_nodes = [(0,0),(3,0),(0,3),(3,3),(6,0), (0,6)]
 
 class Graph:
         def __init__(self, nodes):
@@ -162,4 +162,4 @@ class Graph:
 
 goals = [(0,3), (0,6)]
 g = Graph(example_nodes)
-print(g.plan_path((.5,0), (0,.5)))
+print(g.plan_path((0,3), (0,6)))
