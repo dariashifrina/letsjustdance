@@ -10,6 +10,8 @@ from tf.transformations import quaternion_from_euler, euler_from_quaternion
 from operator import itemgetter
 import graph
 
+right_path = []
+
 def get_yaw_from_pose(p):
     """ A helper function that takes in a Pose object (geometry_msgs) and returns yaw"""
 
@@ -41,7 +43,7 @@ class RobotMovement:
             self.position = None
             rospy.sleep(1)
             self.initialized = True
-            self.navigate_graph([[0,0], [0,3], [0,6], [-3,3]])
+            self.navigate_graph(right_path)
 
 
 
@@ -85,7 +87,7 @@ class RobotMovement:
                     speed.angular.z = 0.0
                     self.navigator.publish(speed)
                     break
-                if abs(angle_to_goal- theta) > 0.3:
+                if abs(angle_to_goal- theta) > 0.35:
                     speed.linear.x = 0.0
                     prop_control = 0.3
                     if((angle_to_goal - theta) > 3.5):
@@ -96,8 +98,35 @@ class RobotMovement:
                         speed.angular.z = prop_control
                 else:
                     speed.linear.x = 0.5
-                    speed.angular.z = 0.0
+                    image = self.view
+                    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
+                    lower_yellow = numpy.array([30, 64, 127]) #TODO
+                    upper_yellow = numpy.array([30, 255, 255]) #TODO
+                    mask = cv2.inRange(hsv, lower_yellow, upper_yellow)
+
+                    # this erases all pixels that aren't yellow
+                    h, w, d = image.shape
+                    search_top = int(3*h/4)
+                    search_bot = int(3*h/4 + 20)
+                    mask[0:search_top, 0:w] = 0
+                    mask[search_bot:h, 0:w] = 0
+
+                    # using moments() function, the center of the yellow pixels is determined
+                    M = cv2.moments(mask)
+                    # if there are any yellow pixels found
+                    if M['m00'] > 0:
+                            # center of the yellow pixels in the image
+                            cx = int(M['m10']/M['m00'])
+                            cy = int(M['m01']/M['m00'])
+
+                            # a red circle is visualized in the debugging window to indicate
+                            # the center point of the yellow pixels
+                            cv2.circle(image, (cx, cy), 20, (0,0,255), -1)
+                            prop_control = 0.3
+                            center = w/2
+                            error = (center - cx)
+                            speed.angular.z = prop_control * error*3.1415/180
                 self.navigator.publish(speed)
 
         #takes in a list like: [[0,0], [0,3], [0,6], [-3,3]] and navigates thru the items one at a time
@@ -114,9 +143,9 @@ class RobotMovement:
 
 if __name__ == '__main__':
 
-        example_nodes = [(0,0),(3,0),(0,3),(3,3), (0,6)]
+        example_nodes = [(0,0),(3,0),(0,3),(3,3),(6,0), (0,6)]
         g = graph.Graph(example_nodes)
-        print(g.plan_path((0,0), (0,6)))
+        right_path = g.plan_path((0,0), (3,3))
         rospy.init_node('robotmovement')
         robot_movement = RobotMovement()
         robot_movement.run()
