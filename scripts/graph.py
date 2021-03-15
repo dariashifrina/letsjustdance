@@ -116,16 +116,13 @@ class Graph:
             if whole_goal == -1 or whole_src == -1:
                 return -1
 
-            print(whole_goal)
-            print(goal)
 
             if math.dist(whole_src, goal) > math.dist(src, goal) or math.dist(src, whole_goal) > math.dist(src, goal):
                 # check if the src and goal are between the same intersections
-                return []
+                return [goal]
             path = self.plan_path_in_edges(whole_src, whole_goal)
             if path == -1:
                 return path
-            print(path)
             # if not self.is_equal(whole_src, src):
             #     path = [whole_src] + path
             #     print(path)
@@ -162,4 +159,4 @@ class Graph:
 
 goals = [(0,3), (0,6)]
 g = Graph(example_nodes)
-print(g.plan_path((0,3), (0,6)))
+print(g.plan_path((0,3), (0,5.3)))
