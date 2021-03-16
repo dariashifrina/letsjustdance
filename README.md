@@ -30,6 +30,19 @@ $ roscore
 ```
 $ roslaunch lets_just_dance turtlebot3_custom_world.launch
 ```
+```
+$ rosrun lets_just_dance robotmovement.py
+```
+
+```
+$ rosrun lets_just_dance navigationui.py
+```
+
+### Navigation UI:
+
+<p align="center">
+  <img src="navigationui.png" alt="Navigation UI"/>
+</p>
 
 ### References:
 
