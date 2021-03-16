@@ -2,6 +2,7 @@
 
 import rospy, cv2, cv_bridge, numpy
 from sensor_msgs.msg import Image, LaserScan
+from std_msgs.msg import String
 from geometry_msgs.msg import Twist, Point
 import moveit_commander
 import math
@@ -38,14 +39,23 @@ class RobotMovement:
             self.image_sub = rospy.Subscriber('camera/rgb/image_raw', Image, self.image_callback)
             self.navigator = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
             rospy.Subscriber("/scan", LaserScan, self.process_scan)
+            rospy.Subscriber("/navigate_vel", String, self.run_sequence)
 
             self.odometry = rospy.Subscriber("/odom", Odometry, self.odometry_callback)
             self.position = None
             rospy.sleep(1)
             self.initialized = True
-            self.navigate_graph(right_path)
 
 
+        def run_sequence(self,msg):
+            msg = (msg.data)
+            command_list = msg.split(',')
+            destinations = []
+            for coords in command_list:                
+                x_val = -9 + ((int(coords) // 7) * 3)
+                y_val = -9 + ((int(coords) % 7) * 3)
+                destinations.append([x_val, y_val])
+            self.navigate_graph(destinations)
 
         def image_callback(self, msg):
 
