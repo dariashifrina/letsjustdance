@@ -80,6 +80,8 @@ class RobotMovement:
             self.navigator.publish(twister)
 
         def travel(self, x, y):
+            # for debugging
+            print("traveling")
             while True:
                 goal = Point()
                 speed = Twist()
@@ -97,6 +99,7 @@ class RobotMovement:
                     speed.angular.z = 0.0
                     self.navigator.publish(speed)
                     break
+                self.detect_stopsign()
                 if abs(angle_to_goal- theta) > 0.35:
                     speed.linear.x = 0.0
                     prop_control = 0.3
@@ -147,6 +150,27 @@ class RobotMovement:
         def process_scan(self, data):
             self.directly_ahead = data.ranges[0]
 
+        def detect_stopsign(self):
+            image = self.view
+            hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+
+            # Color Detection Range 
+            # TODO: find correct red range for stop sign
+            lower_red = numpy.array([0, 50,200])
+            upper_red = numpy.array([0, 255, 0])
+            mask = cv2.inRange(hsv,lower_red, upper_red)
+            
+            h, w, d = image.shape
+            M = cv2.moments(mask)
+
+            if M['m00'] > 0:
+                    print("red ", M['m00'])
+                    if M['m00'] > 800000:
+                        print("stop")
+                    # vel_msg = Twist()
+                    # self.navigator.publish(vel_msg)
+            
+            
         #call this to make robot stoop and open grasp. ready to grip dumbbell -> needs fixing. it doesnt pick it up well...
         def run(self):
             rospy.spin()

@@ -30,3 +30,20 @@ $ roscore
 ```
 $ roslaunch lets_just_dance turtlebot3_custom_world.launch
 ```
+```
+$ rosrun lets_just_dance robotmovement.py
+```
+
+```
+$ rosrun lets_just_dance navigationui.py
+```
+
+### Navigation UI:
+
+<p align="center">
+  <img src="navigationui.PNG" alt="Navigation UI"/>
+</p>
+
+### References:
+
+1. Multiple turtles: https://github.com/francimala/ROS_multiple_navigation
