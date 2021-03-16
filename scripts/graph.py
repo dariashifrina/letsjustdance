@@ -158,7 +158,3 @@ class Graph:
                 return self.plan_path_single(src, goal)
 
 
-
-goals = [(0,3), (0,6)]
-g = Graph(example_nodes)
-print(g.plan_path((0,0), goals))
