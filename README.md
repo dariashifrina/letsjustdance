@@ -41,7 +41,7 @@ $ rosrun lets_just_dance navigationui.py
 ### Navigation UI:
 
 <p align="center">
-  <img src="navigationui.png" alt="Navigation UI"/>
+  <img src="navigationui.PNG" alt="Navigation UI"/>
 </p>
 
 ### References:
