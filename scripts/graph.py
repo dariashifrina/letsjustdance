@@ -109,13 +109,12 @@ class Graph:
                                 explored.append(node)
                 return -1
 
-        def plan_path(self, src, goal):
+        def plan_path_single(self, src, goal):
             # plan_path, but works with src and goal not in edges, i.e. betwen nodes
             whole_src = self.find_nearest_node_with_goal(src,goal)
             whole_goal = self.find_nearest_goal(src, goal)
             if whole_goal == -1 or whole_src == -1:
                 return -1
-
 
             if math.dist(whole_src, goal) > math.dist(src, goal) or math.dist(src, whole_goal) > math.dist(src, goal):
                 # check if the src and goal are between the same intersections
@@ -123,9 +122,6 @@ class Graph:
             path = self.plan_path_in_edges(whole_src, whole_goal)
             if path == -1:
                 return path
-            # if not self.is_equal(whole_src, src):
-            #     path = [whole_src] + path
-            #     print(path)
 
             if not self.is_equal(whole_goal, goal):
                 if not path:
@@ -148,15 +144,21 @@ class Graph:
                 for goal in perm:
                     if len(cur_path):    
                         cur_path.pop()
-                    cur_path += self.plan_path(prev,goal)
+                    cur_path += self.plan_path_single(prev,goal)
                     prev = goal
                 if len(cur_path) < length:
                     path = cur_path
                     length = len(cur_path)
             return path
+        
+        def plan_path(self, src, goal):
+            if type(goal) is list:
+                return self.plan_mult_paths(src, goal)
+            else:
+                return self.plan_path_single(src, goal)
 
 
 
 goals = [(0,3), (0,6)]
 g = Graph(example_nodes)
-print(g.plan_path((0,3), (0,5.3)))
+print(g.plan_path((0,0), goals))
