@@ -177,9 +177,18 @@ class RobotMovement:
 
 if __name__ == '__main__':
 
-        example_nodes = [(0,0),(3,0),(0,3),(3,3),(6,0), (0,6)]
-        g = graph.Graph(example_nodes)
+        #nodes = [(0,0),(3,0),(0,3),(3,3),(6,0), (0,6)]
+        nodes = []
+        x = -9
+        while x <= 9:
+            y = -9
+            while y <= 9:
+                nodes.append((x,y))
+                y += 3
+            x += 3
+        g = graph.Graph(nodes)
         right_path = g.plan_path((0,0), (3,3))
         rospy.init_node('robotmovement')
         robot_movement = RobotMovement()
+        #robot_movement.navigate_graph(right_path)
         robot_movement.run()
