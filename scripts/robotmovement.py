@@ -45,6 +45,9 @@ class RobotMovement:
             self.position = None
             rospy.sleep(1)
             self.initialized = True
+            
+            self.stop = False
+            self.detect = True
 
 
         def run_sequence(self,msg):
@@ -100,6 +103,14 @@ class RobotMovement:
                     self.navigator.publish(speed)
                     break
                 self.detect_stopsign()
+                if (self.stop is True) and (self.detect is True):
+                    speed.linear.x = 0.0
+                    speed.angular.z = 0.0
+                    self.navigator.publish(speed)
+                    print("sleeping")
+                    rospy.sleep(3)
+                    print("awake")
+                    self.detect = False
                 if abs(angle_to_goal- theta) > 0.35:
                     speed.linear.x = 0.0
                     prop_control = 0.3
@@ -156,8 +167,8 @@ class RobotMovement:
 
             # Color Detection Range 
             # TODO: find correct red range for stop sign
-            lower_red = numpy.array([0, 50,200])
-            upper_red = numpy.array([0, 255, 0])
+            lower_red = numpy.array([0, 100, 100])
+            upper_red = numpy.array([10, 255, 255])
             mask = cv2.inRange(hsv,lower_red, upper_red)
             
             h, w, d = image.shape
@@ -165,10 +176,12 @@ class RobotMovement:
 
             if M['m00'] > 0:
                     print("red ", M['m00'])
-                    if M['m00'] > 800000:
+                    if M['m00'] > 5000000:
+                        self.stop = True
                         print("stop")
-                    # vel_msg = Twist()
-                    # self.navigator.publish(vel_msg)
+            
+            if M['m00'] < 10000:
+                self.detect = True
             
             
         #call this to make robot stoop and open grasp. ready to grip dumbbell -> needs fixing. it doesnt pick it up well...
