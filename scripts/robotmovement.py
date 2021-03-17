@@ -43,6 +43,9 @@ class RobotMovement:
             #TODO link correct function for Sub
             # # set up ROS / OpenCV bridge
             self.bridge = cv_bridge.CvBridge()
+            
+            # initalize the debugging window
+            cv2.namedWindow("window", 1)
 
             self.image_sub = rospy.Subscriber('camera/rgb/image_raw', Image, self.image_callback)
             self.navigator = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
@@ -126,6 +129,8 @@ class RobotMovement:
                     self.navigator.publish(speed)
                     break
                 self.detect_stopsign()
+                self.avoid_cone()
+                self.avoid_robot()
                 if (self.stop is True) and (self.detect is True):
                     speed.linear.x = 0.0
                     speed.angular.z = 0.0
@@ -134,6 +139,7 @@ class RobotMovement:
                     rospy.sleep(3)
                     print("awake")
                     self.detect = False
+                    self.stop = False
                 if abs(angle_to_goal- theta) > 0.35:
                     speed.linear.x = 0.0
                     prop_control = 0.3
@@ -190,8 +196,8 @@ class RobotMovement:
 
             # Color Detection Range 
             # TODO: find correct red range for stop sign
-            lower_red = numpy.array([0, 100, 100])
-            upper_red = numpy.array([10, 255, 255])
+            lower_red = numpy.array([0, 20, 20])
+            upper_red = numpy.array([0, 200, 200])
             mask = cv2.inRange(hsv,lower_red, upper_red)
             
             h, w, d = image.shape
@@ -199,12 +205,49 @@ class RobotMovement:
 
             if M['m00'] > 0:
                     print("red ", M['m00'])
-                    if M['m00'] > 5000000:
+                    if M['m00'] > 250000:
                         self.stop = True
                         print("stop")
             
-            if M['m00'] < 10000:
+            if M['m00'] < 100000:
                 self.detect = True
+                
+            # shows the debugging window
+            cv2.imshow("window", image)
+            cv2.waitKey(3)
+        
+        def avoid_robot(self):
+            image = self.view
+            hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+
+            # Color Detection Range 
+            lower_black = numpy.array([0, 0, 0])
+            upper_black = numpy.array([255, 255, 0])
+            mask = cv2.inRange(hsv,lower_black, upper_black)
+            
+            h, w, d = image.shape
+            M = cv2.moments(mask)
+
+            if M['m00'] > 0:
+                print("black ", M['m00'])
+            
+        def avoid_cone(self):
+            image = self.view
+            hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+
+            # Color Detection Range 
+            lower_orange = numpy.array([0, 100, 100])
+            upper_orange = numpy.array([10, 255, 255])
+            mask = cv2.inRange(hsv,lower_orange, upper_orange)
+            
+            h, w, d = image.shape
+            M = cv2.moments(mask)
+
+            if M['m00'] > 0:
+                print("orange ", M['m00'])
+                if M['m00'] > 5000000:
+                    print("stop")
+            
                 
         def travel_2(self, x, y):
             # for debugging
