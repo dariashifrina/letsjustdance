@@ -63,6 +63,7 @@ class RobotMovement:
             
             self.stop = False
             self.detect = True
+            
             self.cur_location = (0,0)
 
         def run_sequence(self,msg):
@@ -129,8 +130,8 @@ class RobotMovement:
                     self.navigator.publish(speed)
                     break
                 self.detect_stopsign()
-                self.avoid_cone()
-                self.avoid_robot()
+                self.navigate_around_cone()
+                self.avoid_robot_collision()
                 if (self.stop is True) and (self.detect is True):
                     speed.linear.x = 0.0
                     speed.angular.z = 0.0
@@ -140,7 +141,7 @@ class RobotMovement:
                     print("awake")
                     self.detect = False
                     self.stop = False
-                if abs(angle_to_goal- theta) > 0.35:
+                elif abs(angle_to_goal- theta) > 0.35:
                     speed.linear.x = 0.0
                     prop_control = 0.3
                     if((angle_to_goal - theta) > 3.5):
@@ -195,7 +196,6 @@ class RobotMovement:
             hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
             # Color Detection Range 
-            # TODO: find correct red range for stop sign
             lower_red = numpy.array([0, 20, 20])
             upper_red = numpy.array([0, 200, 200])
             mask = cv2.inRange(hsv,lower_red, upper_red)
@@ -204,34 +204,44 @@ class RobotMovement:
             M = cv2.moments(mask)
 
             if M['m00'] > 0:
-                    print("red ", M['m00'])
-                    if M['m00'] > 250000:
+                    if M['m00'] > 270000:
                         self.stop = True
                         print("stop")
             
-            if M['m00'] < 100000:
+            if M['m00'] < 8000:
                 self.detect = True
-                
+            
             # shows the debugging window
             cv2.imshow("window", image)
             cv2.waitKey(3)
         
-        def avoid_robot(self):
+        def avoid_robot_collision(self):
             image = self.view
             hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
             # Color Detection Range 
             lower_black = numpy.array([0, 0, 0])
-            upper_black = numpy.array([255, 255, 0])
+            upper_black = numpy.array([255, 0, 100])
             mask = cv2.inRange(hsv,lower_black, upper_black)
             
             h, w, d = image.shape
             M = cv2.moments(mask)
 
-            if M['m00'] > 0:
-                print("black ", M['m00'])
+            if M['m00'] > 12000000:
+                print("avoiding robot ", M['m00'])
+                speed = Twist()
+                # turn left
+                speed.angular.z = 0.5
+                self.navigator.publish(speed)
+                rospy.sleep(3)
+                speed.angular.z = -0.5
+                rospy.sleep(2)
+                
+                speed.linear.x = 0.06
+                speed.angular.z = 0
+                self.navigator.publish(speed)
             
-        def avoid_cone(self):
+        def navigate_around_cone(self):
             image = self.view
             hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
@@ -243,11 +253,55 @@ class RobotMovement:
             h, w, d = image.shape
             M = cv2.moments(mask)
 
-            if M['m00'] > 0:
-                print("orange ", M['m00'])
-                if M['m00'] > 5000000:
-                    print("stop")
-            
+            if M['m00'] > 4150000:
+                print("avoiding cone", M['m00'])
+                speed = Twist()
+                # turn left
+                speed.linear.x = 0
+                speed.angular.z = 0.5
+                self.navigator.publish(speed)
+                rospy.sleep(3)
+                
+                # go forward (left)
+                speed.angular.z = 0
+                speed.linear.x = 0.2
+                self.navigator.publish(speed)
+                rospy.sleep(4)
+                
+                # turn right
+                speed.linear.x = 0
+                speed.angular.z = -0.5
+                self.navigator.publish(speed)
+                rospy.sleep(3)
+                
+                # go forward
+                speed.angular.z = 0
+                speed.linear.x = 0.2
+                self.navigator.publish(speed)
+                rospy.sleep(5)
+                
+                # turn right
+                speed.linear.x = 0
+                speed.angular.z = -0.5
+                self.navigator.publish(speed)
+                rospy.sleep(3)
+                
+                # go forward (right)
+                speed.angular.z = 0
+                speed.linear.x = 0.2
+                self.navigator.publish(speed)
+                rospy.sleep(4)
+                
+                # turn left
+                speed.linear.x = 0
+                speed.angular.z = 0.5
+                self.navigator.publish(speed)
+                rospy.sleep(3)
+                
+                # continue
+                speed.linear.x = 0.06
+                speed.angular.z = 0
+                self.navigator.publish(speed)
                 
         def travel_2(self, x, y):
             # for debugging
