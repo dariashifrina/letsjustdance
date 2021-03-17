@@ -3,7 +3,7 @@
 import rospy, cv2, cv_bridge, numpy
 from sensor_msgs.msg import Image, LaserScan
 from std_msgs.msg import String
-from geometry_msgs.msg import Twist, Point
+from geometry_msgs.msg import Twist, Point, Vector3
 import moveit_commander
 import math
 from nav_msgs.msg import Odometry
@@ -49,6 +49,10 @@ class RobotMovement:
             rospy.Subscriber("/scan", LaserScan, self.process_scan)
             rospy.Subscriber("/navigate_vel", String, self.run_sequence)
 
+            self.tb_2_vel_pub = rospy.Publisher('/tb3_0/cmd_vel', Twist, queue_size =10)
+            self.odometry_2 = rospy.Subscriber("tb3_0/odom", Odometry, self.odometry_callback_2)
+            self.image_sub_2 = rospy.Subscriber('tb3_0/camera/rgb/image_raw', Image, self.image_callback_2)
+
             self.odometry = rospy.Subscriber("/odom", Odometry, self.odometry_callback)
             self.position = None
             rospy.sleep(1)
@@ -57,7 +61,6 @@ class RobotMovement:
             self.stop = False
             self.detect = True
             self.cur_location = (0,0)
-
 
         def run_sequence(self,msg):
             msg = (msg.data)
@@ -77,8 +80,15 @@ class RobotMovement:
 
             self.view = self.bridge.imgmsg_to_cv2(msg,desired_encoding='bgr8')
 
+        def image_callback_2(self, msg):
+
+            self.view_2 = self.bridge.imgmsg_to_cv2(msg,desired_encoding='bgr8')
+
         def odometry_callback(self, data):
             self.position = data.pose.pose
+        
+        def odometry_callback_2(self, data):
+            self.position_2 = data.pose.pose
 
         #helper function for rotating bot. used to survey the numbers on the blocks.
         def turn_around(self, angle):
@@ -97,7 +107,7 @@ class RobotMovement:
 
         def travel(self, x, y):
             # for debugging
-            print("traveling")
+            print("traveling")  
             while True:
                 goal = Point()
                 speed = Twist()
@@ -195,10 +205,82 @@ class RobotMovement:
             
             if M['m00'] < 10000:
                 self.detect = True
-            
+                
+        def travel_2(self, x, y):
+            # for debugging
+            print("traveling")  
+            while True:
+                goal = Point()
+                speed = Twist()
+                goal.x = x
+                goal.y = y
+                rot_q = self.position_2.orientation
+                (roll, pitch,  theta) = euler_from_quaternion([rot_q.x, rot_q.y, rot_q.z, rot_q.w])
+                inc_x = goal.x - self.position_2.position.x
+                inc_y = goal.y - self.position_2.position.y
+
+                angle_to_goal = math.atan2(inc_y, inc_x)
+                distance = pow((pow(inc_x, 2) + pow(inc_y,2)), 0.5)
+                if distance < 0.1:
+                    speed.linear.x = 0.0
+                    speed.angular.z = 0.0
+                    self.tb_2_vel_pub.publish(speed)
+                    break
+                if abs(angle_to_goal- theta) > 0.35:
+                    speed.linear.x = 0.0
+                    prop_control = 0.3
+                    if((angle_to_goal - theta) > 3.5):
+                        speed.angular.z = prop_control * -1
+                    elif((angle_to_goal - theta) > -1.7 and (angle_to_goal - theta) < 0):
+                        speed.angular.z = prop_control * -1
+                    else:
+                        speed.angular.z = prop_control
+                else:
+                    speed.linear.x = 0.5
+                    image = self.view_2
+                    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+
+                    lower_yellow = numpy.array([30, 64, 127]) #TODO
+                    upper_yellow = numpy.array([30, 255, 255]) #TODO
+                    mask = cv2.inRange(hsv, lower_yellow, upper_yellow)
+
+                    # this erases all pixels that aren't yellow
+                    h, w, d = image.shape
+                    search_top = int(3*h/4)
+                    search_bot = int(3*h/4 + 20)
+                    mask[0:search_top, 0:w] = 0
+                    mask[search_bot:h, 0:w] = 0
+
+                    # using moments() function, the center of the yellow pixels is determined
+                    M = cv2.moments(mask)
+                    # if there are any yellow pixels found
+                    if M['m00'] > 0:
+                            # center of the yellow pixels in the image
+                            cx = int(M['m10']/M['m00'])
+                            cy = int(M['m01']/M['m00'])
+
+                            # a red circle is visualized in the debugging window to indicate
+                            # the center point of the yellow pixels
+                            cv2.circle(image, (cx, cy), 20, (0,0,255), -1)
+                            prop_control = 0.3
+                            center = w/2
+                            error = (center - cx)
+                            speed.angular.z = prop_control * error*3.1415/180
+                self.tb_2_vel_pub.publish(speed)
+
+        def navigate_graph_2(self, graphlist):
+            for pair in graphlist:
+                self.travel_2(pair[0],pair[1])
+
+        def drive_square(self):
+            nodes = [(6,6), (6,9), (9,9), (9,6), (6,6)]
+            while True:
+                self.navigate_graph_2(nodes)
+
             
         #call this to make robot stoop and open grasp. ready to grip dumbbell -> needs fixing. it doesnt pick it up well...
         def run(self):
+            self.drive_square()
             rospy.spin()
 
 if __name__ == '__main__':
