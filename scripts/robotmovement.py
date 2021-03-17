@@ -12,6 +12,14 @@ from operator import itemgetter
 import graph
 
 right_path = []
+nodes = []
+x = -9
+while x <= 9:
+    y = -9
+    while y <= 9:
+        nodes.append((x,y))
+        y += 3
+    x += 3
 
 def get_yaw_from_pose(p):
     """ A helper function that takes in a Pose object (geometry_msgs) and returns yaw"""
@@ -48,6 +56,7 @@ class RobotMovement:
             
             self.stop = False
             self.detect = True
+            self.cur_location = (0,0)
 
 
         def run_sequence(self,msg):
@@ -58,7 +67,11 @@ class RobotMovement:
                 x_val = -9 + ((int(coords) // 7) * 3)
                 y_val = -9 + ((int(coords) % 7) * 3)
                 destinations.append([x_val, y_val])
-            self.navigate_graph(destinations)
+            tuple_destinations = [tuple(l) for l in destinations]
+            g = graph.Graph(nodes)
+            right_path = g.plan_path(self.cur_location,tuple_destinations)
+            self.cur_location = right_path[len(right_path) - 1]
+            self.navigate_graph(right_path)
 
         def image_callback(self, msg):
 
@@ -189,19 +202,6 @@ class RobotMovement:
             rospy.spin()
 
 if __name__ == '__main__':
-
-        #nodes = [(0,0),(3,0),(0,3),(3,3),(6,0), (0,6)]
-        nodes = []
-        x = -9
-        while x <= 9:
-            y = -9
-            while y <= 9:
-                nodes.append((x,y))
-                y += 3
-            x += 3
-        g = graph.Graph(nodes)
-        right_path = g.plan_path((0,0), (3,3))
         rospy.init_node('robotmovement')
         robot_movement = RobotMovement()
-        #robot_movement.navigate_graph(right_path)
         robot_movement.run()
