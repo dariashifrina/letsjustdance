@@ -5,7 +5,7 @@
 ## Demo Video
 
 <p align="center">
-  <a href="https://youtu.be/SYro1Mo5R_E"><img height="300px" src="citybot-min.png" alt="City Grid"/></a>
+  <a target="_blank" href="https://youtu.be/SYro1Mo5R_E"><img height="300px" src="citybot-min.png" alt="City Grid"/></a>
 </p>
 
 
