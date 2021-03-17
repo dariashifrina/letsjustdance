@@ -234,8 +234,8 @@ class RobotMovement:
                 speed.angular.z = 0.5
                 self.navigator.publish(speed)
                 rospy.sleep(3)
-                speed.angular.z = -0.5
-                rospy.sleep(2)
+                # speed.angular.z = -0.5
+                # rospy.sleep(2)
                 
                 speed.linear.x = 0.06
                 speed.angular.z = 0
