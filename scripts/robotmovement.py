@@ -131,7 +131,6 @@ class RobotMovement:
                     break
                 self.detect_stopsign()
                 self.navigate_around_cone()
-                self.avoid_robot_collision()
                 if (self.stop is True) and (self.detect is True):
                     speed.linear.x = 0.0
                     speed.angular.z = 0.0
@@ -227,20 +226,15 @@ class RobotMovement:
             h, w, d = image.shape
             M = cv2.moments(mask)
 
-            if M['m00'] > 12000000:
+            if M['m00'] > 18000000:
                 print("avoiding robot ", M['m00'])
                 speed = Twist()
                 # turn left
-                speed.angular.z = 0.5
-                self.navigator.publish(speed)
-                rospy.sleep(3)
-                # speed.angular.z = -0.5
-                # rospy.sleep(2)
-                
-                speed.linear.x = 0.06
                 speed.angular.z = 0
+                speed.linear.x = 0
                 self.navigator.publish(speed)
-            
+                rospy.sleep(2)
+                
         def navigate_around_cone(self):
             image = self.view
             hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
@@ -302,6 +296,9 @@ class RobotMovement:
                 speed.linear.x = 0.06
                 speed.angular.z = 0
                 self.navigator.publish(speed)
+            else:
+                self.avoid_robot_collision()
+
                 
         def travel_2(self, x, y):
             # for debugging
