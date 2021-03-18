@@ -2,12 +2,12 @@
 
 ## Team Members: Leandra Nealer, Joyce Passananti, Daria Shifrina
 
+## Demo Video
 
 <p align="center">
-  <img src="mapgrid.png" alt="City Grid"/>
+  <a href="https://youtu.be/SYro1Mo5R_E" target="_blank"><img height="300px" src="citybot-min.png" alt="City Grid"/></a>
 </p>
 
-Final Project Repository for Introduction to Robotics. 
 
 
 
