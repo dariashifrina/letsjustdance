@@ -65,8 +65,8 @@ Our robot can find the shortest route between any number of destinations on the 
 **BFS Search Algorithm**: The graph takes as input the nodes in the grid, which are used to store locations. Unweighted/undirected edges are stored in a dictionary as Graph[a] = [b, c]. Searching the nearest edges first, the algorithm computes the shortest path to the destination and outputs a list of nodes the the goal.
 * Graph initialization: Graph takes in the list of nodes you want to include in the graph. You can also adjust the size of the grid squares with self.n. For each node in the given list, the graph finds the adjacent nodes  (using the assumed grid layout) and forms edges with these adjacent nodes.
 * bfs(): BFS is the implementation of the breadth first search algorithm for shortest path planning. BFS only works on nodes that are actually in the set of edges, but later functions will also allow navigation to locations along edges.
-* plan_path(): Plan path combines plan_mult_paths and plan_path_single. These functions both use the BFS algorithm on an array of goals and a single goal respectively, and return the fastest path to the goal or goals. Plan path can take in either an array of goals or a single goal and runs the correct function.
-* find_nearest_node_with_goal() and find_nearest_goal(): These functions are used to implement path planning to and between locations between nodes. find_nearest_goal finds the nearest node to the goal. find_nearest_node_with_goal finds the node to the src, but also considers which is closer to the goal to navigate to first.
+* plan_path(): Plan path combines `plan_mult_paths` and `plan_path_single`. These functions both use the BFS algorithm on an array of goals and a single goal respectively, and return the fastest path to the goal or goals. Plan path can take in either an array of goals or a single goal and runs the correct function.
+* `find_nearest_node_with_goal()` and `find_nearest_goal()`: These functions are used to implement path planning to and between locations between nodes. `find_nearest_goal` finds the nearest node to the goal. `find_nearest_node_with_goal` finds the node to the src, but also considers which is closer to the goal to navigate to first.
 
 **Navigation**: First, the user sends a set of points through the UI. The UI is written up in `navigationui.py`. The points are passed along through the `/navigate_vel` topic. Within `robotmovement.py`, we subscribe to the topic and process it within `run_sequence`. This function converts the list of integers from the UI into actual grid values using mod and division operations. Then it feeds the list of grid points into the BFS Graph algorithm described above. It takes the output and passes it into the `navigate_graph` function.
 The `navigate_graph` function is a helper function that breaks up the lists of tuples and passes them into the `travel` function. 
@@ -89,6 +89,7 @@ Some elements we considered adding with more time were additional obsacles/traff
 ### Takeaways:
 
 - Having visual references when debugging can be a huge help and simplify the process much more than simply printing specific data.
+- Being flexible with the work plan is often easier and more simple (especially for group projects) as sometimes someone needs to work longer on debugging one component, so other team members can shift around responsibilities to ensure consistent progress and make sure one error doesn't stop everyone's workflow.
 
 ### References:
 
