@@ -46,7 +46,7 @@ $ rosrun lets_just_dance navigationui.py
 
 The motivation for our project was to create an advanced prototype of themes we have covered so far by combining more complex robot navigation and manipulation with a path finding algorithm. The main components of our project are: 
 
-**Componenets:**
+**Components:**
 1) Given a list of locations in a city (imitated through a gazebo simulation), our bot will find the shortest route that it can take through all points. 
 2) Move between nodes along the fastest path, Use odometry to detect when goal is reached, Stay centered on the path
 3) While navigating, the bot will need to follow basic traffic rules: stop at stop signs, avoid driving on the sidewalk, avoid traffic cones. 
@@ -68,11 +68,9 @@ Our robot can find the shortest route between any number of destinations on the 
 * plan_path(): Plan path combines plan_mult_paths and plan_path_single. These functions both use the BFS algorithm on an array of goals and a single goal respectively, and return the fastest path to the goal or goals. Plan path can take in either an array of goals or a single goal and runs the correct function.
 * find_nearest_node_with_goal() and find_nearest_goal(): These functions are used to implement path planning to and between locations between nodes. find_nearest_goal finds the nearest node to the goal. find_nearest_node_with_goal finds the node to the src, but also considers which is closer to the goal to navigate to first.
 
-**Navigation**: First we take as input the list of adjacent (x, y) nodes output by the path algorithm, then use odometry and proportion control to navigate between two points on the map as follows:
-1) Rotate to the correct theta value using proportional control
-2) Move forward until the destination is reached
-
-We identify when goal is reached using odometry and use line color to stay centered on road (adapted from in-class excercise)
+**Navigation**: First, the user sends a set of points through the UI. The UI is written up in `navigationui.py`. The points are passed along through the `/navigate_vel` topic. Within `robotmovement.py`, we subscribe to the topic and process it within `run_sequence`. This function converts the list of integers from the UI into actual grid values using mod and division operations. Then it feeds the list of grid points into the BFS Graph algorithm described above. It takes the output and passes it into the `navigate_graph` function.
+The `navigate_graph` function is a helper function that breaks up the lists of tuples and passes them into the `travel` function. 
+The `travel` function navigates to a specific x,y value using the odometry topic. First, it rotates to the correct angle using the euler_from_quaternion function. Based on the proximity between theta and the angle difference to the goal, it sets angular z to a positive or a negative value to make rotation faster. Once the bot is facing the right direction, the bot then travels towards the target. Here, we add another feature using opencv2 to make sure the bot stays centered on the yellow grid lines while traveling forward to follow traffic rules.
 
 **Perception**: Detect objects based on color: red for stop signs, orange for traffic cones, and black for other robots. When enough red pixels are detected to indicate an approximate distance from stop sign, then set robot's velocity to zero for 3 seconds. Following this, deactivate stopping until red pixels are significantly reduced, ensuring the robot doesn't stay stopped at a single sign. Detect orange for traffic cones, and when a certain distance away have the robot follow a specified movement pattern around the cone, then identify the yellow line again and continue on its way. Recognize proximity to the second robot and stop robot's movement to prevent collision (current code does not control second robot's movement, so the second robot can still run into the controlled one).
 
